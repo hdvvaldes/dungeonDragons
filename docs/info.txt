@@ -1,0 +1,135 @@
+
+Create Account
+Login 
+if user.create_loby 
+  user es Dungeon Master
+else 
+  Join Lobby and 
+  Create character 
+
+ACTIONS:
+  - Login 
+  - LogOut
+
+API: TOON
+
+OBJECTS:
+
+USER:
+  id: <STRING>
+  name: <STRING>
+  username: <STRING>
+  character: <CHARACTER>
+
+LOBBY:
+  id: <STRING>
+  name: <STRING>
+  owner: <USER>
+  users: <USER[]>
+
+
+---------------------------
+
+Petition to create account
+
+action: "signup"
+new_account:
+  username: <STRING>  
+  hash_pass: <STRING> 
+
+RETURNS {
+
+action: "signup"
+success: 0
+error_desc: <STRING>
+
+action: "signup"
+success:1
+user_id: <STRING>
+
+}
+---------------------------
+
+Petition to login
+
+action: "login"
+credentials:
+  username: <username>
+  hash_pass: <password>
+
+RETURNS {
+
+action: "login"
+success: 0
+error_desc: <STRING>
+
+action: "login"
+success: 1
+token: <STRING>
+
+}
+
+------------------------------
+
+Get Info
+
+action: "match"
+token: <STRING>
+obj_identifier: <STRING>
+filter: 
+  attr: <STRING>
+  value: <STRING>
+
+RETURNS {
+  
+action: "match"
+success: 0
+error_desc: <STRING>
+
+action: "match"
+success: 1
+matchs: <OBJECT[]>
+
+}
+
+-----------------------------
+
+Create Lobby
+
+action: "create_lobby"
+token: <STRING>
+new_lobby:
+  name: <STRING>
+
+RETURNS {
+action: "create_lobby"
+success: 0
+error_desc: <STRING>
+
+action: "create_lobby"
+success: 1
+lobby_id: <STRING>
+}
+
+------------------------
+
+Join Lobby
+
+action: "join_lobby"
+token: <STRING>
+lobby: <LOBBY>
+
+RETURNS {
+
+action: "join_lobby"
+success: 0
+error_desc: <STRING>
+
+action: "join_lobby"
+success: 1
+lobby_id: <STRING>
+
+}
+
+---------------------------
+
