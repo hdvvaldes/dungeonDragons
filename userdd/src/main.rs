@@ -1,23 +1,16 @@
+use crate::aplication::Aplication;
 
-use std::io;
-use std::net::TcpStream;
-
-fn connect_user(name: String) -> TcpStream{
-    let mut stream = TcpStream::connect("127.0.0.1:8080")
-
-}
-
+mod aplication;
+mod connection_manager;
 
 fn main() {
-    println!("Welcome to the server for Dungeon and Dragons");
-    println!("What is your name?");
-    let mut name = String::new();
-    io::stdin().read_line(&mut name).expect("Failed to read line");
-    println!("Hello {name}");
     
-    let mut stream = connect_user(name);
-    
-    println!("Successful connection");
+    let mut app = Aplication::new();
+    app.start();
+    while app.is_running() {
+        app.run();
+    }
+    app.close();
 
 }
 
