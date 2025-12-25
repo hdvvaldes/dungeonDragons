@@ -11,7 +11,6 @@ fn main() {
         app.run();
     }
     app.close();
-
 }
 
 

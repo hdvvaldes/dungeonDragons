@@ -2,14 +2,17 @@ use std::io;
 
 use crate::connection_manager::ConnectionManager;
 
+const PROMPT :&str = "What do you want to echo?";
+const PROMPT_CLOSE :&str = "Goodbye!!";
+
 pub struct Aplication {
-    c_manager: ConnectionManager,    
+    c_manager: ConnectionManager
 }
 
 impl Aplication {
-    
+
     pub fn new() -> Self{
-        return Self{ 
+        return Self{
             c_manager: ConnectionManager::new()
         }
     }
@@ -30,16 +33,16 @@ impl Aplication {
     }
 
     pub fn run(&mut self) {
+        println!("{PROMPT}");
         let mut msg = String::new();
         io::stdin()
             .read_line(&mut msg)
             .expect("Failed to read line");
-        self.c_manager.
-            send_msg(&msg);
+        self.c_manager.send_msg(&msg);
     }
 
     pub fn close(&self) {
-
+        println!("{PROMPT_CLOSE}");
     }
 
 }
