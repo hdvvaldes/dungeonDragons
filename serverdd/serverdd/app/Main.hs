@@ -4,4 +4,5 @@ import Server.App
 
 main :: IO()
 main = do 
-  run defaultConfig   
+  let config = defaultConfig
+  run defaultConfig
