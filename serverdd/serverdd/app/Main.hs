@@ -1,8 +1,12 @@
 module Main where
 
-import Server.App
+import Server.App 
 
 main :: IO()
 main = do 
-  let config = defaultConfig
-  run defaultConfig
+  let sktConfig = dSocketConfig
+  let env = Env sktConfig
+  _ <- runApp env $ do
+    runServer
+  putStrLn "Closed Server"
+      

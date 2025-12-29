@@ -27,19 +27,13 @@ instance Monad m => Monad (ReaderT e m)
       let fstRes = funcA env
       in fstRes >>= \x -> runReaderT (t x) env
 
+-- Return Enviroment
 ask :: Monad m => ReaderT e m e
 ask = ReaderT return
 
 asks :: Monad m => (e -> a) -> ReaderT e m a
-asks f = ReaderT $ \env -> return $ f env
+asks f = fmap f ask
 
-lift :: Monad m => 
-  (a -> b) -> ReaderT e m a -> ReaderT e m b
-lift f r = ReaderT $ \env -> do
-  res <- runReaderT r env
-  return $ f res 
-
-
-
-
+lift :: Monad m => m a -> ReaderT e m a
+lift m = ReaderT $ const m 
 
