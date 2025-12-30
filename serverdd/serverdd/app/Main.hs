@@ -4,8 +4,7 @@ import Server.App
 
 main :: IO()
 main = do 
-  let sktConfig = dSocketConfig
-  let env = Env sktConfig
+  let env = Env defaultSocket
   _ <- runApp env $ do
     runServer
   putStrLn "Closed Server"
