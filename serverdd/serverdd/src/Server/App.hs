@@ -7,74 +7,72 @@ module Server.App(
   Env(..),
   runApp,
   runServer,
-  dSocketConfig,
+  defaultSocket
 ) where
 
-import qualified Network.Socket as NS
+import Network.Socket
 import Extra.ReaderT
+import Control.Monad.Reader.Class(MonadReader, asks)
+import Control.Monad.IO.Class(MonadIO, liftIO)
+import Server.ConnectionHandler(runConn)
 
 newtype App a = App
   {unApp :: ReaderT Env IO a} 
   deriving newtype 
-    (Functor, Applicative, Monad);
+    (Functor, 
+    Applicative, 
+    Monad,
+    MonadReader Env,
+    MonadIO
+    )
 
+-- Enviroment for the app --
 data Env = Env {
-  socketConfig :: SocketConfig,
-  socketAddress :: NS.SockAddr
-  }
+  socketConfig :: SocketConfig
+}
 
 data SocketConfig = SocketConfig {
-  socketFamily ::NS.Family,
-  socketType :: NS.SocketType,
-  socketProtoN :: NS.ProtocolNumber,
-  socketPort :: NS.PortNumber,
-  socketHost :: NS.HostAddress
+  socketFamily ::Family,
+  socketType :: SocketType,
+  socketProtoN :: ProtocolNumber,
+  socketAddress :: SockAddr
 }
 
 runApp :: Env -> App a -> IO a
 runApp e r = runReaderT (unApp r) e
 
-dSocketConfig :: SocketConfig 
-dSocketConfig = SocketConfig {
-  socketFamily = NS.AF_INET, 
-  socketType   = NS.Stream,
-  socketProtoN = NS.defaultProtocol,
-  socketPort   = 8080,
-  socketHost   = NS.tupleToHostAddress (127,0,0,1)
+defaultSocket :: SocketConfig 
+defaultSocket = SocketConfig {
+  socketFamily  = AF_INET, 
+  socketType    = Stream,
+  socketProtoN  = defaultProtocol,
+  socketAddress = SockAddrInet port host
 }
+  where
+    port = 8080
+    host  = tupleToHostAddress(127,0,0,1)
 
 runServer :: App ()
-runServer = do 
-  SocketConfig{socketPort, socketHost} <- asks socketConfig
-  let addr = NS.SockAddrInet socketPort socketHost
+runServer = do
   sock <- buildSocket
-  lift $ NS.bind sock addr 
+  SocketConfig{socketAddress} <- asks socketConfig
+  liftIO $ bind sock socketAddress
   let maxConn = 2
-    in lift $ NS.listen sock maxConn
+  liftIO $ listen sock maxConn
+  mainLoop sock
 
------- Helper Functions ------
-buildSocket :: App NS.Socket
-buildSocket = do  
+------ Helper Functio------
+buildSocket :: App Socket
+buildSocket = do
   SocketConfig{
-    socketFamily, 
-    socketType, 
+    socketFamily,
+    socketType,
     socketProtoN} <- asks socketConfig
-  lift $ NS.socket socketFamily socketType socketProtoN
-   
+  liftIO $ socket socketFamily socketType socketProtoN
 
-
-
--- run :: IO()
--- run = do
---   sock <-
---   bind sock scktAddr
---   let maxConn = 2
---     in listen sock maxConn
--- 
--- 
--- mainLoop :: Socket -> IO()
--- mainLoop sock = do
---   conn <- accept sock
---   runConn conn
---   mainLoop sock
+mainLoop :: Socket -> App()
+mainLoop sock = do
+  conn <- liftIO $ accept sock
+  liftIO $ runConn conn
+  mainLoop sock
 

@@ -1,10 +1,15 @@
+{-# LANGUAGE MultiParamTypeClasses #-}
+{-# LANGUAGE FlexibleInstances #-}
+
 module Extra.ReaderT(
   ReaderT,
   runReaderT,
   ask,
-  asks, 
   lift
 ) where 
+import Control.Monad.Reader.Class(MonadReader, ask, local)
+import Control.Monad.Trans.Class(MonadTrans, lift)
+import Control.Monad.IO.Class(MonadIO, liftIO)
 
 newtype ReaderT e m a =  
   ReaderT {runReaderT :: e -> m a}
@@ -26,14 +31,14 @@ instance Monad m => Monad (ReaderT e m)
     ReaderT $ \env ->
       let fstRes = funcA env
       in fstRes >>= \x -> runReaderT (t x) env
-
--- Return Enviroment
-ask :: Monad m => ReaderT e m e
-ask = ReaderT return
-
-asks :: Monad m => (e -> a) -> ReaderT e m a
-asks f = fmap f ask
-
-lift :: Monad m => m a -> ReaderT e m a
-lift m = ReaderT $ const m 
+instance Monad m => MonadReader e (ReaderT e m)
+  where 
+    ask = ReaderT return
+    local modE (ReaderT res1) = ReaderT $ res1 . modE
+instance MonadTrans (ReaderT a)
+  where 
+      lift res = ReaderT $ const res
+instance MonadIO (ReaderT e IO)
+  where 
+    liftIO = lift
 
