@@ -50,18 +50,15 @@ defaultSocket = SocketConfig {
 }
   where
     port = 8080
-    host  = tupleToHostAddress(127,0,0,1)
+    host = tupleToHostAddress(127,0,0,1)
 
 runServer :: App ()
 runServer = do
   sock <- buildSocket
-  SocketConfig{socketAddress} <- asks socketConfig
-  liftIO $ bind sock socketAddress
-  let maxConn = 2
-  liftIO $ listen sock maxConn
+  startSocket sock
   mainLoop sock
 
------- Helper Functio------
+------ Helper Function ------
 buildSocket :: App Socket
 buildSocket = do
   SocketConfig{
@@ -70,9 +67,18 @@ buildSocket = do
     socketProtoN} <- asks socketConfig
   liftIO $ socket socketFamily socketType socketProtoN
 
+
+startSocket :: Socket -> App ()
+startSocket sock = do 
+  SocketConfig{socketAddress} <- asks socketConfig
+  liftIO $ bind sock socketAddress
+  let maxConn = 2
+  liftIO $ listen sock maxConn
+
 mainLoop :: Socket -> App()
 mainLoop sock = do
   conn <- liftIO $ accept sock
   liftIO $ runConn conn
+  liftIO $ putStrLn "connection found"
   mainLoop sock
 
